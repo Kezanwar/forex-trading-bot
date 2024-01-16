@@ -12,6 +12,7 @@ import { Granularity } from "constants/candles";
 import {
   formatMidCandlesToStockData,
   formatMidCandlesToTimeStamps,
+  formatPrice,
 } from "util/format";
 import { log, logBlue, logGreen, logRed } from "util/log";
 
@@ -63,7 +64,7 @@ export class BBModel {
   }
 
   async createBuyTrade() {
-    logGreen("--- BEARISH MODEL | placing order.... ---");
+    logGreen("--- BULLISH MODEL | placing order.... ---");
     try {
       const { data } = await getCandlesSell({
         count: 1,
@@ -71,25 +72,27 @@ export class BBModel {
         granularity: this.granularity,
       });
 
-      const price = data.candles[0].bid.c;
+      const price = formatPrice(Number(data.candles[0].bid.c) - 0.2);
 
       const order = await createLimitOrder({
         price: price,
         instrument: this.currency,
         timeInForce: "GTC",
         stopLossOnFill: {
-          price: `${Number(price) - 1}`,
+          price: formatPrice(Number(price) - 0.3),
           timeInForce: "GTC",
         },
         takeProfitOnFill: {
-          price: `${Number(price) + 1}`,
+          price: formatPrice(Number(price) + 0.8),
         },
         units: "1",
         type: "LIMIT",
         positionFill: "DEFAULT",
       });
 
-      logGreen("--- BEARISH MODEL | order placed ---");
+      console.log(order.data.orderCreateTransaction);
+
+      logGreen("--- BULLISH MODEL | order placed ---");
     } catch (error) {
       throw error;
     }
@@ -103,26 +106,27 @@ export class BBModel {
         granularity: this.granularity,
       });
 
-      const price = data.candles[0].bid.c;
+      const price = formatPrice(Number(data.candles[0].bid.c) + 0.2);
 
       const order = await createLimitOrder({
         price: price,
         instrument: this.currency,
         timeInForce: "GTC",
         stopLossOnFill: {
-          price: `${Number(price) + 1}`,
+          price: formatPrice(Number(price) + 0.3),
           timeInForce: "GTC",
         },
         takeProfitOnFill: {
-          price: `${Number(price) - 2}`,
+          price: formatPrice(Number(price) - 0.8),
         },
         units: "-1",
         type: "LIMIT",
         positionFill: "DEFAULT",
       });
 
-      logGreen("--- BEARISH MODEL | order placed ---");
       console.log(order.data.orderCreateTransaction);
+
+      logGreen("--- BEARISH MODEL | order placed ---");
     } catch (error) {
       throw error;
     }
@@ -137,13 +141,16 @@ export class BBModel {
         if (is_bearish) {
           logGreen("--- BEARISH MODEL | should place a trade ---");
           await this.createSellTrade();
-        } else if (is_bullish) {
-          logGreen("--- BULLISH MODEL | should place a trade ---");
-          await this.createBuyTrade();
-        } else {
-          this.logNoTrade();
           return;
         }
+        if (is_bullish) {
+          logGreen("--- BULLISH MODEL | should place a trade ---");
+          await this.createBuyTrade();
+          return;
+        }
+
+        this.logNoTrade();
+        return;
       } catch (error) {
         console.error(error);
         throw error;

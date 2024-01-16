@@ -29,3 +29,5 @@ export const formatMidCandlesToTimeStamps: FormatCandlesToTimeStamps = (
 ) => {
   return candles.map((c) => format(new Date(c.time), "dd-MM-yyyy HH:mm:ss"));
 };
+
+export const formatPrice = (num: number) => num.toFixed(3);
