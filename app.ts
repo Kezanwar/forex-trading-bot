@@ -12,24 +12,6 @@ try {
   });
 
   model.start();
-
-  // const order = await createLimitOrder({
-  //   price: "2035.125",
-  //   instrument: XAUUSD,
-  //   timeInForce: "GTC",
-  //   stopLossOnFill: {
-  //     price: "2038.000",
-  //     timeInForce: "GTC",
-  //   },
-  //   takeProfitOnFill: {
-  //     price: "2033.000",
-  //   },
-  //   units: "-1",
-  //   type: "LIMIT",
-  //   positionFill: "DEFAULT",
-  // });
-
-  // console.log(order);
 } catch (error) {
   console.error(error);
   process.exit(1);
